@@ -2,10 +2,11 @@ package com.assignment.game.dice;
 
 import com.assignment.game.dice.impl.CrookedDice;
 import com.assignment.game.dice.impl.NormalDice;
+import junit.framework.TestCase;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class DiceTest {
+public class DiceTest extends TestCase {
 
     @Test
     public void test_rollNormalDice_shouldNotExceedSix() {

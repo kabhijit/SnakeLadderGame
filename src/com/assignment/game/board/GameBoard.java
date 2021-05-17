@@ -70,8 +70,6 @@ public class GameBoard {
         if (this.elementsMap.containsKey(this.currentPos)) {
             this.currentPos = this.elementsMap.get(this.currentPos).getEnd();
         }
-        if (this.currentPos == this.limit)
-            System.out.println("You have won the game!!");
         return currentPos;
     }
 

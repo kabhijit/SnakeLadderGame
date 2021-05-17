@@ -22,12 +22,12 @@ public class PlaySnakeLadderGame {
 
         // Create the board for the game.
         GameBoard board = new GameBoard(row, column);
-        DisplayUtil.displayMessage("Game booard created with " + row + " rows and " + column + " columns");
+        DisplayUtil.displayMessage("Game board created with " + row + " rows and " + column + " columns");
 
         addBoardElements(inputObj, board, true,
                 "Add Snakes in format start1-end1, start2-end2, ....",
                 "Constraint: start should be an integer which is greater than corresponding end",
-                "Constraint: start cannot be the last tile");
+                "Constraint: start cannot be the last tile for any snake");
 
         addBoardElements(inputObj, board, false,
                 "Add Ladders in format start1-end1, start2-end2, ....",
@@ -84,6 +84,7 @@ public class PlaySnakeLadderGame {
 
         final String elements = inputObj.nextLine();
         for (String elementConfig: elements.split(",")) {
+            elementConfig = elementConfig.trim();
             String[] elementStartEnd = elementConfig.split("-");
             if (elementStartEnd.length == 2) {
                 try {
@@ -110,9 +111,12 @@ public class PlaySnakeLadderGame {
     private static int getIntegerInput(final Scanner inputObj) {
         String input = inputObj.nextLine();
         try {
-            return Integer.parseInt(input);
+            int x = Integer.parseInt(input);
+            if (x < 0)
+                throw new NumberFormatException("Negative number is meaningless");
+            return x;
         } catch (NumberFormatException ex) {
-            DisplayUtil.displayMessage("This is not a valid number, please enter a valid number");
+            DisplayUtil.displayMessage("This is not a valid positive number, please enter a valid number");
             return getIntegerInput(inputObj);
         }
     }

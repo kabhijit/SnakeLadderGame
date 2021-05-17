@@ -4,11 +4,12 @@ import com.assignment.game.exception.ElementExistsException;
 import com.assignment.game.exception.InvalidLadderConfigException;
 import com.assignment.game.exception.InvalidSnakeConfigException;
 
+import junit.framework.TestCase;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.Before;
 
-public class GameBoardTest {
+public class GameBoardTest extends TestCase {
     GameBoard testGameBoard;
 
     @Before
