@@ -1,8 +1,8 @@
 package com.assignment.game.dice;
 
 public enum DiceType {
-    DICE_TYPE_CROOKED("C"),
-    DICE_TYPE_NORMAL("N");
+    CROOKED("CROOKED"),
+    NORMAL("NORMAL");
 
     private final String diceTypeText;
 

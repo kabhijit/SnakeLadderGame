@@ -31,7 +31,7 @@ public class GameBoard {
         this.row = row;
         this.column = column;
         this.limit = row * column;
-        this.currentPos = 1;
+        this.currentPos = 0;
         this.elementsMap = new HashMap<>();
     }
 

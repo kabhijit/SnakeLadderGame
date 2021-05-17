@@ -3,74 +3,117 @@ package com.assignment.game;
 import com.assignment.game.board.GameBoard;
 import com.assignment.game.dice.Dice;
 import com.assignment.game.dice.DiceType;
-import com.assignment.game.dice.impl.CrookedDice;
-import com.assignment.game.dice.impl.NormalDice;
 import com.assignment.game.exception.ElementExistsException;
 import com.assignment.game.exception.InvalidLadderConfigException;
 import com.assignment.game.exception.InvalidSnakeConfigException;
+import com.assignment.game.utils.DiceFactory;
 import com.assignment.game.utils.DisplayUtil;
 
 import java.util.Scanner;
 
 public class PlaySnakeLadderGame {
-    public static void main(String... args) throws Exception {
+    public static void main(String... args) {
         Scanner inputObj = new Scanner(System.in);
 
         DisplayUtil.displayMessage("Enter number of rows: ");
-        int row = Integer.parseInt(inputObj.nextLine());
+        int row = getIntegerInput(inputObj);
         DisplayUtil.displayMessage("Enter number of columns: ");
-        int column = Integer.parseInt(inputObj.nextLine());
+        int column = getIntegerInput(inputObj);
 
         // Create the board for the game.
         GameBoard board = new GameBoard(row, column);
         DisplayUtil.displayMessage("Game booard created with " + row + " rows and " + column + " columns");
 
-        // Take input from users related to snake (start and end) and add them to board.
-        DisplayUtil.displayMessage("Add Snakes in format start1-end1, start2-end2, ....");
-        DisplayUtil.displayMessage("Constraint: start should be an integer which is greater than corresponding end");
-        DisplayUtil.displayMessage("Constraint: start cannot be the last tile");
-        final String snakes = inputObj.nextLine();
-        for (String snakeConfig: snakes.split(",")) {
-            String[] snakeStartEnd = snakeConfig.split("-");
-            if (snakeStartEnd.length == 2) {
-                board.addSnake(Integer.parseInt(snakeStartEnd[0]), Integer.parseInt(snakeStartEnd[1]));
-            }
+        addBoardElements(inputObj, board, true,
+                "Add Snakes in format start1-end1, start2-end2, ....",
+                "Constraint: start should be an integer which is greater than corresponding end",
+                "Constraint: start cannot be the last tile");
+
+        addBoardElements(inputObj, board, false,
+                "Add Ladders in format start1-end1, start2-end2, ....",
+                "Constraint: start should be an integer which is lesser than corresponding end");
+
+        // Choose the dice type
+        DisplayUtil.displayMessage("Enter " + DiceType.NORMAL.toString() + " to play with normal dice or "
+                + DiceType.CROOKED.toString() + " to play with crooked dice");
+        Dice dice = null;
+        while (dice == null) {
+            String type = inputObj.nextLine();
+            dice = getDiceInstance(type);
         }
 
-        // Take input from users related to ladders (start and end) and add them to board.
-        DisplayUtil.displayMessage("Add Ladders in format start1-end1, start2-end2, ....");
-        DisplayUtil.displayMessage("Constraint: start should be an integer which is lesser than corresponding end");
-        final String ladders = inputObj.nextLine();
-        for (String ladderConfig: ladders.split(",")) {
-            String[] ladderStartEnd = ladderConfig.split("-");
-            if (ladderStartEnd.length == 2) {
-                board.addLadder(Integer.parseInt(ladderStartEnd[0]), Integer.parseInt(ladderStartEnd[1]));
-            }
-        }
-
-        Dice dice;
-        DisplayUtil.displayMessage("Enter " + DiceType.DICE_TYPE_NORMAL.toString() + " to play with normal dice or "
-                + DiceType.DICE_TYPE_CROOKED.toString() + " to play with crooked dice");
-        final String diceChoice = inputObj.nextLine();
-        switch (DiceType.valueOf(diceChoice)) {
-            case DICE_TYPE_CROOKED:
-                dice = new CrookedDice();
-                break;
-            default:
-                dice = new NormalDice();
-        }
-
+        // Start playing the game
         DisplayUtil.displayMessage("Starting the game, you will be provided 10 moves. Let's see if you can win by reaching the end.");
-        DisplayUtil.displayMessage("Currently you are at " + board.getCurrentPos() + " position");
+        DisplayUtil.displayMessage("Currently you are at " + (board.getCurrentPos() + 1) + " position");
         for (int i = 0; i < 10; ++i) {
             DisplayUtil.displayMessage("Press <enter> to roll the dice");
+            inputObj.nextLine();
             final int diceRoll = dice.roll();
 
             board.play(diceRoll);
-            DisplayUtil.displayMessage("Your roll was " + diceRoll + " and went at " + board.getCurrentPos() + " position");
+            DisplayUtil.displayMessage("Your roll was " + diceRoll + " and went at " + (board.getCurrentPos() + 1) + " position");
+
+            // If won break from loop
+            if (board.hasWon())
+                break;
         }
 
         String resultBanner = "You have " + (board.hasWon() ? "won" : "lost") + " the game.";
         DisplayUtil.displayMessage(resultBanner);
+    }
+
+    private static Dice getDiceInstance(final String type) {
+        try {
+            return DiceFactory.getDiceOfType(type);
+        } catch (IllegalArgumentException e) {
+            DisplayUtil.displayMessage("Invalid option entered, please enter a valid choice ["
+                    + DiceType.NORMAL.toString()
+                    + " or "
+                    + DiceType.CROOKED.toString() + "]");
+            return null;
+        }
+    }
+
+    // Take input from users related to snake (start and end) and add them to board.
+    private static void addBoardElements(final Scanner inputObj,
+                                         final GameBoard board,
+                                         final boolean isSnake,
+                                         final String... banners) {
+        for (String banner: banners)
+            DisplayUtil.displayMessage(banner);
+
+        final String elements = inputObj.nextLine();
+        for (String elementConfig: elements.split(",")) {
+            String[] elementStartEnd = elementConfig.split("-");
+            if (elementStartEnd.length == 2) {
+                try {
+                    if (isSnake) {
+                        board.addSnake(Integer.parseInt(elementStartEnd[0]),
+                                Integer.parseInt(elementStartEnd[1]));
+                    } else {
+                        board.addLadder(Integer.parseInt(elementStartEnd[0]),
+                                Integer.parseInt(elementStartEnd[1]));
+                    }
+                } catch (InvalidSnakeConfigException e) {
+                    DisplayUtil.displayMessage("Invalid snake configuration entered " + elementStartEnd);
+                    addBoardElements(inputObj, board, isSnake, banners);
+                } catch (InvalidLadderConfigException e) {
+                    DisplayUtil.displayMessage("Invalid ladder configuration entered " + elementStartEnd);
+                    addBoardElements(inputObj, board, isSnake, banners);
+                } catch (ElementExistsException e) {
+                    DisplayUtil.displayMessage(elementStartEnd + "already exists");
+                }
+            }
+        }
+    }
+
+    private static int getIntegerInput(final Scanner inputObj) {
+        String input = inputObj.nextLine();
+        try {
+            return Integer.parseInt(input);
+        } catch (NumberFormatException ex) {
+            DisplayUtil.displayMessage("This is not a valid number, please enter a valid number");
+            return getIntegerInput(inputObj);
+        }
     }
 }
