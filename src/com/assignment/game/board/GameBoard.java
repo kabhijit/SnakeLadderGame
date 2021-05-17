@@ -74,4 +74,8 @@ public class GameBoard {
             System.out.println("You have won the game!!");
         return currentPos;
     }
+
+    public boolean hasWon() {
+        return this.currentPos == this.limit;
+    }
 }
