@@ -31,7 +31,7 @@ public class ValidationUtil {
                                         final int end,
                                         final int size) {
 
-        return end < size
+        return end <= size
                 && start < end;
     }
 }

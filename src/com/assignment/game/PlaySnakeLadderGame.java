@@ -89,21 +89,21 @@ public class PlaySnakeLadderGame {
             if (elementStartEnd.length == 2) {
                 try {
                     if (isSnake) {
-                        board.addSnake(Integer.parseInt(elementStartEnd[0]),
-                                Integer.parseInt(elementStartEnd[1]));
+                        board.addSnake(getPositiveIntegerFromString(elementStartEnd[0]),
+                                getPositiveIntegerFromString(elementStartEnd[1]));
                     } else {
-                        board.addLadder(Integer.parseInt(elementStartEnd[0]),
-                                Integer.parseInt(elementStartEnd[1]));
+                        board.addLadder(getPositiveIntegerFromString(elementStartEnd[0]),
+                                getPositiveIntegerFromString(elementStartEnd[1]));
                     }
-                } catch (InvalidSnakeConfigException e) {
-                    DisplayUtil.displayMessage("Invalid snake configuration entered " + elementStartEnd);
-                    addBoardElements(inputObj, board, isSnake, banners);
-                } catch (InvalidLadderConfigException e) {
-                    DisplayUtil.displayMessage("Invalid ladder configuration entered " + elementStartEnd);
+                } catch (InvalidSnakeConfigException | InvalidLadderConfigException | NumberFormatException e) {
+                    DisplayUtil.displayMessage(e.getMessage());
                     addBoardElements(inputObj, board, isSnake, banners);
                 } catch (ElementExistsException e) {
-                    DisplayUtil.displayMessage(elementStartEnd + "already exists");
+                    DisplayUtil.displayMessage(e.getMessage());
                 }
+            } else {
+                DisplayUtil.displayMessage("Invalid configuration entered. Please try again");
+                addBoardElements(inputObj, board, isSnake, banners);
             }
         }
     }
@@ -111,13 +111,17 @@ public class PlaySnakeLadderGame {
     private static int getIntegerInput(final Scanner inputObj) {
         String input = inputObj.nextLine();
         try {
-            int x = Integer.parseInt(input);
-            if (x < 0)
-                throw new NumberFormatException("Negative number is meaningless");
-            return x;
+            return getPositiveIntegerFromString(input);
         } catch (NumberFormatException ex) {
             DisplayUtil.displayMessage("This is not a valid positive number, please enter a valid number");
             return getIntegerInput(inputObj);
         }
+    }
+
+    private static int getPositiveIntegerFromString(final String input) throws NumberFormatException {
+        int x = Integer.parseInt(input.trim());
+        if (x < 0)
+            throw new NumberFormatException("Negative number is meaningless");
+        return x;
     }
 }

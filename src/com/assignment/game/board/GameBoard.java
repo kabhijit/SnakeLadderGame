@@ -6,6 +6,7 @@ import com.assignment.game.board.elements.impl.Snake;
 import com.assignment.game.exception.ElementExistsException;
 import com.assignment.game.exception.InvalidLadderConfigException;
 import com.assignment.game.exception.InvalidSnakeConfigException;
+import com.assignment.game.utils.DisplayUtil;
 import com.assignment.game.utils.ValidationUtil;
 
 import java.util.HashMap;
@@ -68,7 +69,9 @@ public class GameBoard {
             this.currentPos += move;
         }
         if (this.elementsMap.containsKey(this.currentPos)) {
+            int oldPosition = this.currentPos;
             this.currentPos = this.elementsMap.get(this.currentPos).getEnd();
+            DisplayUtil.displayMessage("You have automatically moved from " + oldPosition + " to " + this.currentPos);
         }
         return currentPos;
     }
