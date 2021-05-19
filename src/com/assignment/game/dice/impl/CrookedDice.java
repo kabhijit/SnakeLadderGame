@@ -6,6 +6,6 @@ public class CrookedDice implements Dice {
 
     @Override
     public int roll() {
-        return 2 * (int) Math.round(3 * Math.random());
+        return 2 * (int) Math.round(2 * Math.random()) + 2;
     }
 }

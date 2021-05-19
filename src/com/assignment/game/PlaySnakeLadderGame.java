@@ -45,7 +45,8 @@ public class PlaySnakeLadderGame {
         // Start playing the game
         DisplayUtil.displayMessage("Starting the game, you will be provided 10 moves. Let's see if you can win by reaching the end.");
         DisplayUtil.displayMessage("Currently you are at " + (board.getCurrentPos() + 1) + " position");
-        for (int i = 0; i < 10; ++i) {
+        int moves;
+        for (moves = 0; moves < 10; ++moves) {
             DisplayUtil.displayMessage("Press <enter> to roll the dice");
             inputObj.nextLine();
             final int diceRoll = dice.roll();
@@ -58,7 +59,7 @@ public class PlaySnakeLadderGame {
                 break;
         }
 
-        String resultBanner = "You have " + (board.hasWon() ? "won" : "lost") + " the game.";
+        String resultBanner = "You have " + (board.hasWon() ? "won" : "lost") + " the game in " + (moves + 1) + " moves.";
         DisplayUtil.displayMessage(resultBanner);
     }
 

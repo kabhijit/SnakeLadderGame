@@ -6,6 +6,6 @@ public class NormalDice implements Dice {
 
     @Override
     public int roll() {
-        return (int) Math.round(6 * Math.random());
+        return (int) Math.round(5 * Math.random()) + 1;
     }
 }

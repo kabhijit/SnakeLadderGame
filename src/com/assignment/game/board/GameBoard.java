@@ -19,13 +19,13 @@ public class GameBoard {
     private int currentPos;
     private final Map<Integer, Element> elementsMap;
 
-    // This wont be called
-    private GameBoard() {
-        this.row = 0;
-        this.column = 0;
-        this.limit = 0;
+    // This creates a default board of 10x10
+    public GameBoard() {
+        this.row = 10;
+        this.column = 10;
+        this.limit = row * column;
         this.currentPos = 0;
-        this.elementsMap = null;
+        this.elementsMap = new HashMap<>();
     }
 
     public GameBoard(int row, int column) {
@@ -48,20 +48,22 @@ public class GameBoard {
         if (!ValidationUtil.isValidSnake(start, end, this.row * this.column)) {
             throw new InvalidSnakeConfigException("Snake start " + start + " is lower than end " + end);
         }
-        if (this.elementsMap.containsKey(start)) {
-            throw new ElementExistsException("A snake or a ladder already exists at " + start);
+        if (checkElementAvailability(start, end)) {
+            Snake snake = new Snake(start, end);
+            this.elementsMap.put(start, snake);
+            this.elementsMap.put(end, snake);
         }
-        this.elementsMap.putIfAbsent(start, new Snake(start, end));
     }
 
     public void addLadder(final int start, final int end) throws InvalidLadderConfigException, ElementExistsException {
         if (!ValidationUtil.isValidLadder(start, end, this.limit)) {
             throw new InvalidLadderConfigException("Ladder start " + start + " is higher than end " + end);
         }
-        if (this.elementsMap.containsKey(start)) {
-            throw new ElementExistsException("A snake or a ladder already exists at " + start);
+        if (checkElementAvailability(start, end)) {
+            Ladder ladder = new Ladder(start, end);
+            this.elementsMap.put(start, ladder);
+            this.elementsMap.put(end, ladder);
         }
-        this.elementsMap.putIfAbsent(start, new Ladder(start, end));
     }
 
     public int play(final int move) {
@@ -78,5 +80,12 @@ public class GameBoard {
 
     public boolean hasWon() {
         return this.currentPos == this.limit;
+    }
+
+    private boolean checkElementAvailability(int start, int end) throws ElementExistsException {
+        if (this.elementsMap.containsKey(start) || this.elementsMap.containsKey(end)) {
+            throw new ElementExistsException("A snake or a ladder already exists at " + start);
+        }
+        return true;
     }
 }
