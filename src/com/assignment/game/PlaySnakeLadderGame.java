@@ -1,6 +1,7 @@
 package com.assignment.game;
 
 import com.assignment.game.board.GameBoard;
+import com.assignment.game.board.Player;
 import com.assignment.game.dice.Dice;
 import com.assignment.game.dice.DiceType;
 import com.assignment.game.exception.ElementExistsException;
@@ -41,6 +42,8 @@ public class PlaySnakeLadderGame {
             String type = inputObj.nextLine();
             dice = getDiceInstance(type);
         }
+        Player singlePlayer = new Player(dice, 'X');
+        board.registerPlayer(singlePlayer);
 
         // Start playing the game
         DisplayUtil.displayMessage("Starting the game, you will be provided 10 moves. Let's see if you can win by reaching the end.");
@@ -49,17 +52,17 @@ public class PlaySnakeLadderGame {
         for (moves = 0; moves < 10; ++moves) {
             DisplayUtil.displayMessage("Press <enter> to roll the dice");
             inputObj.nextLine();
-            final int diceRoll = dice.roll();
 
-            board.play(diceRoll);
-            DisplayUtil.displayMessage("Your roll was " + diceRoll + " and went at " + (board.getCurrentPos() + 1) + " position");
+            board.play();
+            DisplayUtil.displayMessage("Your roll was " + board.lastRecordedMove() + " and went at " + (board.getCurrentPos() + 1) + " position");
+            board.displayBoard();
 
             // If won break from loop
             if (board.hasWon())
                 break;
         }
 
-        String resultBanner = "You have " + (board.hasWon() ? "won" : "lost") + " the game in " + (moves + 1) + " moves.";
+        String resultBanner = "You have " + (board.hasWon() ? "won" : "lost") + " the game in " + (moves + 1) + "th move.";
         DisplayUtil.displayMessage(resultBanner);
     }
 

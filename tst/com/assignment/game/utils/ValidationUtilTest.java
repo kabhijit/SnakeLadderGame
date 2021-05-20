@@ -28,7 +28,7 @@ public class ValidationUtilTest extends TestCase {
     public void test_isValidLadder_shouldReturnFalseWhenStartIsOutOfBound() {
         Assert.assertFalse(ValidationUtil.isValidLadder(5,300, 10));
     }
-    
+
     public void test_isValidLadder_shouldReturnTrueWhenStartBiggerWithinBounds() {
         Assert.assertTrue(ValidationUtil.isValidLadder(2,9, 10));
     }

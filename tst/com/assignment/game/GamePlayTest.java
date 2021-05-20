@@ -1,6 +1,7 @@
 package com.assignment.game;
 
 import com.assignment.game.board.GameBoard;
+import com.assignment.game.board.Player;
 import com.assignment.game.dice.Dice;
 import com.assignment.game.dice.impl.NormalDice;
 import com.assignment.game.exception.ElementExistsException;
@@ -45,10 +46,13 @@ public class GamePlayTest {
     }
 
     @Test
-    public void test_snakeLadderGamePlay1() {
+    public void test_snakeLadderGamePlayforSinglePlayer() {
+        Player singlePlayer = new Player(this.dice, 'X');
+        this.gameBoard.registerPlayer(singlePlayer);
+
         while (this.gameBoard.getCurrentPos() < 25) {
             int diceRoll = dice.roll();
-            this.gameBoard.play(diceRoll);
+            this.gameBoard.play();
             System.out.println("Played dice roll " + dice.roll() + " current position " + this.gameBoard.getCurrentPos());
         }
         Assert.assertEquals(25, this.gameBoard.getCurrentPos());
