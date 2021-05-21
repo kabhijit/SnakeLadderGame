@@ -3,6 +3,8 @@ package com.assignment.game.board;
 import com.assignment.game.board.elements.Element;
 import com.assignment.game.board.elements.impl.Ladder;
 import com.assignment.game.board.elements.impl.Snake;
+import com.assignment.game.constants.CommonConstants;
+import com.assignment.game.constants.Message;
 import com.assignment.game.exception.ElementExistsException;
 import com.assignment.game.exception.InvalidLadderConfigException;
 import com.assignment.game.exception.InvalidSnakeConfigException;
@@ -92,19 +94,19 @@ public class GameBoard {
         DisplayUtil.displayMessage(horizontalLine.toString());
         int counter = this.limit;
         for(int i = this.row; i > 0 ; --i) {
-            StringBuilder sb = new StringBuilder("|");
-            StringBuilder sbNo = new StringBuilder("|");
+            StringBuilder sb = new StringBuilder(CommonConstants.SNAKE_LADDER_GAME_FORMATTER_LINE);
+            StringBuilder sbNo = new StringBuilder(CommonConstants.SNAKE_LADDER_GAME_FORMATTER_LINE);
             for(int j = this.column; j > 0 ; --j) {
                 if (i % 2 != 0) {
-                    sbNo.insert(0, "|" + counter + "\t");
+                    sbNo.insert(0, CommonConstants.SNAKE_LADDER_GAME_FORMATTER_LINE + counter + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_SPACE);
                     sb.insert(0, counter == this.players.get(0).getCurrentPosition()
-                            ? "|" + this.players.get(0).getMarker() + "\t"
-                            : "|\t");
+                            ? CommonConstants.SNAKE_LADDER_GAME_FORMATTER_LINE + this.players.get(0).getMarker() + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_SPACE
+                            : CommonConstants.SNAKE_LADDER_GAME_FORMATTER_LINE + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_SPACE);
                 } else {
-                    sbNo.append(counter).append("\t|");
+                    sbNo.append(counter).append(CommonConstants.SNAKE_LADDER_GAME_FORMATTER_SPACE + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_LINE);
                     sb.append(counter == this.players.get(0).getCurrentPosition()
-                            ? this.players.get(0).getMarker() + "\t|"
-                            : "\t|");
+                            ? this.players.get(0).getMarker() + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_SPACE + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_LINE
+                            : CommonConstants.SNAKE_LADDER_GAME_FORMATTER_SPACE + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_LINE);
                 }
                 --counter;
             }
@@ -118,15 +120,20 @@ public class GameBoard {
         final int move = player.play();
         if (this.limit >= move + player.getCurrentPosition()) {
             player.setCurrentPosition(player.getCurrentPosition() + move);
+        } else {
+            DisplayUtil.displayMessage(Message.SNAKE_LADDER_GAME_PLAY_ROLL_VALIDATION_MOVE_EXCEEDED_PREFIX
+                    + move + Message.SNAKE_LADDER_GAME_PLAY_ROLL_VALIDATION_MOVE_EXCEEDED_SUFFIX);
         }
         if (this.elementsMap.containsKey(player.getCurrentPosition())) {
             int oldPosition = player.getCurrentPosition();
             player.setCurrentPosition(this.elementsMap.get(oldPosition).getEnd());
-            DisplayUtil.displayMessage("You have automatically moved from "
-                    + oldPosition + " to "
+            DisplayUtil.displayMessage(Message.SNAKE_LADDER_GAME_ELEMENT_ENCOUNTER_MSG_START
+                    + oldPosition + Message.SNAKE_LADDER_GAME_ELEMENT_ENCOUNTER_MSG_TO
                     + player.getCurrentPosition()
-                    + "beacuse there was a "
-                    + (oldPosition > player.getCurrentPosition() ? "snake at" : "ladder at ")
+                    + Message.SNAKE_LADDER_GAME_ELEMENT_ENCOUNTER_MSG_BETWEEN
+                    + (oldPosition > player.getCurrentPosition()
+                        ? Message.SNAKE_LADDER_GAME_ELEMENT_ENCOUNTER_SNAKE_AT
+                        : Message.SNAKE_LADDER_GAME_ELEMENT_ENCOUNTER_LADDER_AT)
                     + oldPosition);
         }
         return player.getCurrentPosition();
@@ -134,7 +141,7 @@ public class GameBoard {
 
     private boolean checkElementAvailability(int start, int end) throws ElementExistsException {
         if (this.elementsMap.containsKey(start) || this.elementsMap.containsKey(end)) {
-            throw new ElementExistsException("A snake or a ladder already exists at " + start);
+            throw new ElementExistsException(Message.SNAKE_LADDER_GAME_ELEMENT_EXITS_EXCEPTION + start);
         }
         return true;
     }

@@ -2,6 +2,8 @@ package com.assignment.game;
 
 import com.assignment.game.board.GameBoard;
 import com.assignment.game.board.Player;
+import com.assignment.game.constants.CommonConstants;
+import com.assignment.game.constants.Message;
 import com.assignment.game.dice.Dice;
 import com.assignment.game.dice.DiceType;
 import com.assignment.game.exception.ElementExistsException;
@@ -16,27 +18,28 @@ public class PlaySnakeLadderGame {
     public static void main(String... args) {
         Scanner inputObj = new Scanner(System.in);
 
-        DisplayUtil.displayMessage("Enter number of rows: ");
+        DisplayUtil.displayMessage(Message.SNAKE_LADDER_GAME_NUMBER_OF_ROWS);
         int row = getIntegerInput(inputObj);
-        DisplayUtil.displayMessage("Enter number of columns: ");
+        DisplayUtil.displayMessage(Message.SNAKE_LADDER_GAME_NUMBER_OF_COLUMN);
         int column = getIntegerInput(inputObj);
 
         // Create the board for the game.
         GameBoard board = new GameBoard(row, column);
-        DisplayUtil.displayMessage("Game board created with " + row + " rows and " + column + " columns");
+        DisplayUtil.displayMessage(Message.SNAKE_LADDER_GAME_BOARD_CREATED
+                + row + Message.SNAKE_LADDER_GAME_BOARD_ROWS
+                + column + Message.SNAKE_LADDER_GAME_BOARD_COLUMN);
 
         addBoardElements(inputObj, board, true,
-                "Add Snakes in format start1-end1, start2-end2, ....",
-                "Constraint: start should be an integer which is greater than corresponding end",
-                "Constraint: start cannot be the last tile for any snake");
+                Message.SNAKE_LADDER_GAME_BOARD_SNAKE_FORMAT,
+                Message.SNAKE_LADDER_GAME_BOARD_SNAKE_INTEGER_FORMAT,
+                Message.SNAKE_LADDER_GAME_BOARD_SNAKE_LAST_TILE);
 
         addBoardElements(inputObj, board, false,
-                "Add Ladders in format start1-end1, start2-end2, ....",
-                "Constraint: start should be an integer which is lesser than corresponding end");
+                Message.SNAKE_LADDER_GAME_BOARD_LADDER_FORMAT,
+                Message.SNAKE_LADDER_GAME_BOARD_LADDER_INTEGER_FORMAT);
 
         // Choose the dice type
-        DisplayUtil.displayMessage("Enter " + DiceType.NORMAL.toString() + " to play with normal dice or "
-                + DiceType.CROOKED.toString() + " to play with crooked dice");
+        DisplayUtil.displayMessage(Message.SNAKE_LADDER_GAME_DICE_CHOICE);
         Dice dice = null;
         while (dice == null) {
             String type = inputObj.nextLine();
@@ -46,15 +49,17 @@ public class PlaySnakeLadderGame {
         board.registerPlayer(singlePlayer);
 
         // Start playing the game
-        DisplayUtil.displayMessage("Starting the game, you will be provided 10 moves. Let's see if you can win by reaching the end.");
-        DisplayUtil.displayMessage("Currently you are at " + (board.getCurrentPos() + 1) + " position");
+        DisplayUtil.displayMessage(Message.SNAKE_LADDER_GAME_START_MESSAGE);
+        DisplayUtil.displayMessage(Message.SNAKE_LADDER_GAME_PLAY_CURRENT_STATUS
+                + (board.getCurrentPos() + 1) + Message.SNAKE_LADDER_GAME_PLAY_POSITION);
         int moves;
         for (moves = 0; moves < 10; ++moves) {
-            DisplayUtil.displayMessage("Press <enter> to roll the dice");
+            DisplayUtil.displayMessage(Message.SNAKE_LADDER_GAME_PLAY_DICE_ROLL_INFO);
             inputObj.nextLine();
 
             board.play();
-            DisplayUtil.displayMessage("Your roll was " + board.lastRecordedMove() + " and went at " + (board.getCurrentPos() + 1) + " position");
+            DisplayUtil.displayMessage(Message.SNAKE_LADDER_GAME_PLAY_YOUR_ROLL_WAS_INFO + board.lastRecordedMove()
+                    + Message.SNAKE_LADDER_GAME_PLAY_WENT_AT_INFO + (board.getCurrentPos() + 1) + Message.SNAKE_LADDER_GAME_PLAY_POSITION);
             board.displayBoard();
 
             // If won break from loop
@@ -62,7 +67,9 @@ public class PlaySnakeLadderGame {
                 break;
         }
 
-        String resultBanner = "You have " + (board.hasWon() ? "won" : "lost") + " the game in " + (moves + 1) + "th move.";
+        String resultBanner = Message.SNAKE_LADDER_GAME_END_YOU_HAVE
+                + (board.hasWon() ? Message.SNAKE_LADDER_GAME_END_WON : Message.SNAKE_LADDER_GAME_END_LOST)
+                + Message.SNAKE_LADDER_GAME_END_THE_GAME + (moves + 1) + Message.SNAKE_LADDER_GAME_END_MOVE;
         DisplayUtil.displayMessage(resultBanner);
     }
 
@@ -70,10 +77,7 @@ public class PlaySnakeLadderGame {
         try {
             return DiceFactory.getDiceOfType(type);
         } catch (IllegalArgumentException e) {
-            DisplayUtil.displayMessage("Invalid option entered, please enter a valid choice ["
-                    + DiceType.NORMAL.toString()
-                    + " or "
-                    + DiceType.CROOKED.toString() + "]");
+            DisplayUtil.displayMessage(Message.SNAKE_LADDER_GAME_DICE_EXCEPTION_MSG);
             return null;
         }
     }
@@ -87,9 +91,9 @@ public class PlaySnakeLadderGame {
             DisplayUtil.displayMessage(banner);
 
         final String elements = inputObj.nextLine();
-        for (String elementConfig: elements.split(",")) {
+        for (String elementConfig: elements.split(CommonConstants.SNAKE_LADDER_GAME_COMMA_SPLITTER)) {
             elementConfig = elementConfig.trim();
-            String[] elementStartEnd = elementConfig.split("-");
+            String[] elementStartEnd = elementConfig.split(CommonConstants.SNAKE_LADDER_GAME_HYPHEN_SPLITTER);
             if (elementStartEnd.length == 2) {
                 try {
                     if (isSnake) {
@@ -106,7 +110,7 @@ public class PlaySnakeLadderGame {
                     DisplayUtil.displayMessage(e.getMessage());
                 }
             } else {
-                DisplayUtil.displayMessage("Invalid configuration entered. Please try again");
+                DisplayUtil.displayMessage(Message.SNAKE_LADDER_GAME_ELEMENT_EXCEPTION_MSG);
                 addBoardElements(inputObj, board, isSnake, banners);
             }
         }
@@ -117,7 +121,7 @@ public class PlaySnakeLadderGame {
         try {
             return getPositiveIntegerFromString(input);
         } catch (NumberFormatException ex) {
-            DisplayUtil.displayMessage("This is not a valid positive number, please enter a valid number");
+            DisplayUtil.displayMessage(Message.SNAKE_LADDER_GAME_POSITIVE_NUMBER_FORMAT_EXCEPTION_MSG);
             return getIntegerInput(inputObj);
         }
     }
@@ -125,7 +129,7 @@ public class PlaySnakeLadderGame {
     private static int getPositiveIntegerFromString(final String input) throws NumberFormatException {
         int x = Integer.parseInt(input.trim());
         if (x < 0)
-            throw new NumberFormatException("Negative number is meaningless");
+            throw new NumberFormatException(Message.SNAKE_LADDER_GAME_NEGATIVE_NUMBER_ENTERED_EXCEPTION_MSG);
         return x;
     }
 }
