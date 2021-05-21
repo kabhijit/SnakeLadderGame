@@ -1,6 +1,5 @@
 package com.assignment.game.board;
 
-import com.assignment.game.board.elements.Element;
 import com.assignment.game.board.elements.impl.Ladder;
 import com.assignment.game.board.elements.impl.Snake;
 import com.assignment.game.constants.CommonConstants;
@@ -11,16 +10,15 @@ import com.assignment.game.exception.InvalidSnakeConfigException;
 import com.assignment.game.utils.DisplayUtil;
 import com.assignment.game.utils.ValidationUtil;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class GameBoard {
     private final int row;
     private final int column;
     private final int limit;
-    private final Map<Integer, Element> elementsMap;
+    private final Map<Integer, Snake> snakeMap;
+    private final Map<Integer, Ladder> ladderMap;
+    private final Set<Integer> takenTiles;
     private final List<Player> players;
 
     // This creates a default board of 10x10
@@ -28,7 +26,9 @@ public class GameBoard {
         this.row = 10;
         this.column = 10;
         this.limit = row * column;
-        this.elementsMap = new HashMap<>();
+        this.snakeMap = new HashMap<>();
+        this.ladderMap = new HashMap<>();
+        this.takenTiles = new HashSet<>();
         this.players = new ArrayList<>();
     }
 
@@ -36,7 +36,9 @@ public class GameBoard {
         this.row = row;
         this.column = column;
         this.limit = row * column;
-        this.elementsMap = new HashMap<>();
+        this.snakeMap = new HashMap<>();
+        this.ladderMap = new HashMap<>();
+        this.takenTiles = new HashSet<>();
         this.players = new ArrayList<>();
     }
 
@@ -53,24 +55,26 @@ public class GameBoard {
     }
 
     public void addSnake(final int start, final int end) throws InvalidSnakeConfigException, ElementExistsException {
-        if (!ValidationUtil.isValidSnake(start, end, this.row * this.column)) {
-            throw new InvalidSnakeConfigException("Snake start " + start + " is lower than end " + end);
+        if (!ValidationUtil.isValidSnake(start, end, this.limit)) {
+            throw new InvalidSnakeConfigException(Message.SNAKE_LADDER_GAME_INVALID_SNAKE_EXCEPTION_PREFIX + start
+                    + Message.SNAKE_LADDER_GAME_INVALID_SNAKE_EXCEPTION_SUFFIX + end);
         }
         if (checkElementAvailability(start, end)) {
             Snake snake = new Snake(start, end);
-            this.elementsMap.put(start, snake);
-            this.elementsMap.put(end, snake);
+            this.snakeMap.put(start, snake);
+            addTakenTileEntry(start, end);
         }
     }
 
     public void addLadder(final int start, final int end) throws InvalidLadderConfigException, ElementExistsException {
         if (!ValidationUtil.isValidLadder(start, end, this.limit)) {
-            throw new InvalidLadderConfigException("Ladder start " + start + " is higher than end " + end);
+            throw new InvalidLadderConfigException(Message.SNAKE_LADDER_GAME_INVALID_LADDER_EXCEPTION_PREFIX + start
+                    + Message.SNAKE_LADDER_GAME_INVALID_LADDER_EXCEPTION_SUFFIX + end);
         }
         if (checkElementAvailability(start, end)) {
             Ladder ladder = new Ladder(start, end);
-            this.elementsMap.put(start, ladder);
-            this.elementsMap.put(end, ladder);
+            this.ladderMap.put(start, ladder);
+            addTakenTileEntry(start, end);
         }
     }
 
@@ -89,24 +93,24 @@ public class GameBoard {
     public void displayBoard() {
         StringBuilder horizontalLine = new StringBuilder();
         for (int i = 0; i < this.column; ++i)
-            horizontalLine.append("----");
+            horizontalLine.append(CommonConstants.SNAKE_LADDER_GAME_FORMATTER_HORIZONTAL_LINE);
 
         DisplayUtil.displayMessage(horizontalLine.toString());
         int counter = this.limit;
         for(int i = this.row; i > 0 ; --i) {
-            StringBuilder sb = new StringBuilder(CommonConstants.SNAKE_LADDER_GAME_FORMATTER_LINE);
-            StringBuilder sbNo = new StringBuilder(CommonConstants.SNAKE_LADDER_GAME_FORMATTER_LINE);
+            StringBuilder sb = new StringBuilder(CommonConstants.SNAKE_LADDER_GAME_FORMATTER_VERTICAL_LINE);
+            StringBuilder sbNo = new StringBuilder(CommonConstants.SNAKE_LADDER_GAME_FORMATTER_VERTICAL_LINE);
             for(int j = this.column; j > 0 ; --j) {
                 if (i % 2 != 0) {
-                    sbNo.insert(0, CommonConstants.SNAKE_LADDER_GAME_FORMATTER_LINE + counter + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_SPACE);
+                    sbNo.insert(0, CommonConstants.SNAKE_LADDER_GAME_FORMATTER_VERTICAL_LINE + counter + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_SPACE);
                     sb.insert(0, counter == this.players.get(0).getCurrentPosition()
-                            ? CommonConstants.SNAKE_LADDER_GAME_FORMATTER_LINE + this.players.get(0).getMarker() + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_SPACE
-                            : CommonConstants.SNAKE_LADDER_GAME_FORMATTER_LINE + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_SPACE);
+                            ? CommonConstants.SNAKE_LADDER_GAME_FORMATTER_VERTICAL_LINE + this.players.get(0).getMarker() + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_SPACE
+                            : CommonConstants.SNAKE_LADDER_GAME_FORMATTER_VERTICAL_LINE + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_SPACE);
                 } else {
-                    sbNo.append(counter).append(CommonConstants.SNAKE_LADDER_GAME_FORMATTER_SPACE + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_LINE);
+                    sbNo.append(counter).append(CommonConstants.SNAKE_LADDER_GAME_FORMATTER_SPACE + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_VERTICAL_LINE);
                     sb.append(counter == this.players.get(0).getCurrentPosition()
-                            ? this.players.get(0).getMarker() + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_SPACE + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_LINE
-                            : CommonConstants.SNAKE_LADDER_GAME_FORMATTER_SPACE + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_LINE);
+                            ? this.players.get(0).getMarker() + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_SPACE + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_VERTICAL_LINE
+                            : CommonConstants.SNAKE_LADDER_GAME_FORMATTER_SPACE + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_VERTICAL_LINE);
                 }
                 --counter;
             }
@@ -116,6 +120,11 @@ public class GameBoard {
         }
     }
 
+    private void addTakenTileEntry(int start, int end) {
+        this.takenTiles.add(start);
+        this.takenTiles.add(end);
+    }
+
     private int updateMarkerForPlayer(final Player player) {
         final int move = player.play();
         if (this.limit >= move + player.getCurrentPosition()) {
@@ -123,24 +132,50 @@ public class GameBoard {
         } else {
             DisplayUtil.displayMessage(Message.SNAKE_LADDER_GAME_PLAY_ROLL_VALIDATION_MOVE_EXCEEDED_PREFIX
                     + move + Message.SNAKE_LADDER_GAME_PLAY_ROLL_VALIDATION_MOVE_EXCEEDED_SUFFIX);
+            return player.getCurrentPosition();
         }
-        if (this.elementsMap.containsKey(player.getCurrentPosition())) {
+        if (this.snakeMap.containsKey(player.getCurrentPosition())
+                && this.ladderMap.containsKey(player.getCurrentPosition())) {
             int oldPosition = player.getCurrentPosition();
-            player.setCurrentPosition(this.elementsMap.get(oldPosition).getEnd());
-            DisplayUtil.displayMessage(Message.SNAKE_LADDER_GAME_ELEMENT_ENCOUNTER_MSG_START
-                    + oldPosition + Message.SNAKE_LADDER_GAME_ELEMENT_ENCOUNTER_MSG_TO
-                    + player.getCurrentPosition()
-                    + Message.SNAKE_LADDER_GAME_ELEMENT_ENCOUNTER_MSG_BETWEEN
-                    + (oldPosition > player.getCurrentPosition()
-                        ? Message.SNAKE_LADDER_GAME_ELEMENT_ENCOUNTER_SNAKE_AT
-                        : Message.SNAKE_LADDER_GAME_ELEMENT_ENCOUNTER_LADDER_AT)
-                    + oldPosition);
+            int newSnakePosition = getSnakeEndIndexIfPresent(oldPosition).orElse(oldPosition);
+            int newLadderPosition = getLadderEndIndexIfPresent(oldPosition).orElse(oldPosition);
+            if (newSnakePosition != oldPosition) {
+                player.setCurrentPosition(newSnakePosition);
+                DisplayUtil.displayMessage(Message.SNAKE_LADDER_GAME_ELEMENT_ENCOUNTER_MSG_START
+                        + oldPosition + Message.SNAKE_LADDER_GAME_ELEMENT_ENCOUNTER_MSG_TO
+                        + player.getCurrentPosition()
+                        + Message.SNAKE_LADDER_GAME_ELEMENT_ENCOUNTER_MSG_BETWEEN
+                        + Message.SNAKE_LADDER_GAME_ELEMENT_ENCOUNTER_SNAKE_AT
+                        + oldPosition);
+            } else if (oldPosition != newLadderPosition) {
+                player.setCurrentPosition(newLadderPosition);
+                DisplayUtil.displayMessage(Message.SNAKE_LADDER_GAME_ELEMENT_ENCOUNTER_MSG_START
+                        + oldPosition + Message.SNAKE_LADDER_GAME_ELEMENT_ENCOUNTER_MSG_TO
+                        + player.getCurrentPosition()
+                        + Message.SNAKE_LADDER_GAME_ELEMENT_ENCOUNTER_MSG_BETWEEN
+                        + Message.SNAKE_LADDER_GAME_ELEMENT_ENCOUNTER_LADDER_AT
+                        + oldPosition);
+            }
         }
         return player.getCurrentPosition();
     }
 
+    private Optional<Integer> getSnakeEndIndexIfPresent(int start) {
+        if (this.snakeMap.containsKey(start)) {
+            return Optional.of(this.snakeMap.get(start).getEnd());
+        }
+        return Optional.empty();
+    }
+
+    private Optional<Integer> getLadderEndIndexIfPresent(int start) {
+        if (this.ladderMap.containsKey(start)) {
+            return Optional.of(this.ladderMap.get(start).getEnd());
+        }
+        return Optional.empty();
+    }
+
     private boolean checkElementAvailability(int start, int end) throws ElementExistsException {
-        if (this.elementsMap.containsKey(start) || this.elementsMap.containsKey(end)) {
+        if (this.takenTiles.contains(start) || this.takenTiles.contains(end)) {
             throw new ElementExistsException(Message.SNAKE_LADDER_GAME_ELEMENT_EXITS_EXCEPTION + start);
         }
         return true;

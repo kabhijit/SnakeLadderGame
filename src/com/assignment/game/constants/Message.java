@@ -46,5 +46,9 @@ public class Message {
     public static final String SNAKE_LADDER_GAME_POSITIVE_NUMBER_FORMAT_EXCEPTION_MSG = "This is not a valid positive number, please enter a valid number";
     public static final String SNAKE_LADDER_GAME_NEGATIVE_NUMBER_ENTERED_EXCEPTION_MSG = "Negative number is meaningless";
     public static final String SNAKE_LADDER_GAME_ELEMENT_EXITS_EXCEPTION = "A snake or a ladder already exists at ";
+    public static final String SNAKE_LADDER_GAME_INVALID_SNAKE_EXCEPTION_PREFIX = "Snake start ";
+    public static final String SNAKE_LADDER_GAME_INVALID_SNAKE_EXCEPTION_SUFFIX = " is lower than end ";
+    public static final String SNAKE_LADDER_GAME_INVALID_LADDER_EXCEPTION_PREFIX = "Ladder start ";
+    public static final String SNAKE_LADDER_GAME_INVALID_LADDER_EXCEPTION_SUFFIX = " is higher than end ";
 
 }
