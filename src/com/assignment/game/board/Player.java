@@ -3,21 +3,18 @@ package com.assignment.game.board;
 import com.assignment.game.dice.Dice;
 
 public class Player {
-    final Dice dice;
     final Character marker;
     private int currentPos;
     private int lastMove;
 
     private Player() {
-        this.dice = null;
         this.marker = '\0';
-        this.currentPos = 0;
+        this.currentPos = 1;
     }
 
-    public Player(Dice dice, Character marker) {
-        this.dice = dice;
+    public Player(Character marker) {
         this.marker = marker;
-        this.currentPos = 0;
+        this.currentPos = 1;
     }
 
     public Character getMarker() {
@@ -36,8 +33,8 @@ public class Player {
         return this.lastMove;
     }
 
-    public int play() {
-        this.lastMove = this.dice.roll();
+    public int play(final Dice dice) {
+        this.lastMove = dice.roll();
         return lastMove;
     }
 }

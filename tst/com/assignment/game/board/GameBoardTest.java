@@ -14,7 +14,7 @@ public class GameBoardTest extends TestCase {
 
     @Before
     public void setup() {
-        this.testGameBoard = new GameBoard(10);
+        this.testGameBoard = new GameBoard();
     }
 
     @Test

@@ -2,6 +2,8 @@ package com.assignment.game.board;
 
 import com.assignment.game.board.elements.impl.Ladder;
 import com.assignment.game.board.elements.impl.Snake;
+import com.assignment.game.board.strategy.GameStrategy;
+import com.assignment.game.board.strategy.impl.SinglePlayerGameStrategy;
 import com.assignment.game.constants.CommonConstants;
 import com.assignment.game.constants.Message;
 import com.assignment.game.exception.ElementExistsException;
@@ -19,7 +21,7 @@ public class GameBoard {
     private final Map<Integer, Snake> snakeMap;
     private final Map<Integer, Ladder> ladderMap;
     private final Set<Integer> takenTiles;
-    private final List<Player> players;
+    private final GameStrategy gameStrategy;
 
     // This creates a default board of 10x10
     public GameBoard() {
@@ -29,29 +31,25 @@ public class GameBoard {
         this.snakeMap = new HashMap<>();
         this.ladderMap = new HashMap<>();
         this.takenTiles = new HashSet<>();
-        this.players = new ArrayList<>();
+        this.gameStrategy = new SinglePlayerGameStrategy();
     }
 
-    public GameBoard(int row, int column) {
+    public GameBoard(int row, int column, GameStrategy gameStrategy) {
         this.row = row;
         this.column = column;
         this.limit = row * column;
         this.snakeMap = new HashMap<>();
         this.ladderMap = new HashMap<>();
         this.takenTiles = new HashSet<>();
-        this.players = new ArrayList<>();
-    }
-
-    public void registerPlayer(Player p) {
-        this.players.add(p);
+        this.gameStrategy = gameStrategy;
     }
 
     public int getCurrentPos() {
-        return this.players.get(0).getCurrentPosition();
+        return this.gameStrategy.getCurrentPlayer().getCurrentPosition();
     }
 
-    public GameBoard(int size) {
-        this(size, size);
+    public GameBoard(int size, GameStrategy gameStrategy) {
+        this(size, size, gameStrategy);
     }
 
     public void addSnake(final int start, final int end) throws InvalidSnakeConfigException, ElementExistsException {
@@ -79,15 +77,15 @@ public class GameBoard {
     }
 
     public int play() {
-        return updateMarkerForPlayer(this.players.get(0));
+        return updateMarkerForPlayer(this.gameStrategy);
     }
 
     public int lastRecordedMove() {
-        return this.players.get(0).getLastMove();
+        return this.gameStrategy.getCurrentPlayer().getLastMove();
     }
 
     public boolean hasWon() {
-        return this.players.get(0).getCurrentPosition() == this.limit;
+        return this.gameStrategy.getCurrentPlayer().getCurrentPosition() == this.limit;
     }
 
     public void displayBoard() {
@@ -103,13 +101,13 @@ public class GameBoard {
             for(int j = this.column; j > 0 ; --j) {
                 if (i % 2 != 0) {
                     sbNo.insert(0, CommonConstants.SNAKE_LADDER_GAME_FORMATTER_VERTICAL_LINE + counter + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_SPACE);
-                    sb.insert(0, counter == this.players.get(0).getCurrentPosition()
-                            ? CommonConstants.SNAKE_LADDER_GAME_FORMATTER_VERTICAL_LINE + this.players.get(0).getMarker() + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_SPACE
+                    sb.insert(0, counter == this.gameStrategy.getCurrentPlayer().getCurrentPosition()
+                            ? CommonConstants.SNAKE_LADDER_GAME_FORMATTER_VERTICAL_LINE + this.gameStrategy.getCurrentPlayer().getMarker() + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_SPACE
                             : CommonConstants.SNAKE_LADDER_GAME_FORMATTER_VERTICAL_LINE + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_SPACE);
                 } else {
                     sbNo.append(counter).append(CommonConstants.SNAKE_LADDER_GAME_FORMATTER_SPACE + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_VERTICAL_LINE);
-                    sb.append(counter == this.players.get(0).getCurrentPosition()
-                            ? this.players.get(0).getMarker() + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_SPACE + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_VERTICAL_LINE
+                    sb.append(counter == this.gameStrategy.getCurrentPlayer().getCurrentPosition()
+                            ? this.gameStrategy.getCurrentPlayer().getMarker() + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_SPACE + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_VERTICAL_LINE
                             : CommonConstants.SNAKE_LADDER_GAME_FORMATTER_SPACE + CommonConstants.SNAKE_LADDER_GAME_FORMATTER_VERTICAL_LINE);
                 }
                 --counter;
@@ -125,39 +123,39 @@ public class GameBoard {
         this.takenTiles.add(end);
     }
 
-    private int updateMarkerForPlayer(final Player player) {
-        final int move = player.play();
-        if (this.limit >= move + player.getCurrentPosition()) {
-            player.setCurrentPosition(player.getCurrentPosition() + move);
+    private int updateMarkerForPlayer(final GameStrategy strategy) {
+        final int move = strategy.play();
+        if (this.limit >= move + strategy.getCurrentPlayer().getCurrentPosition()) {
+            strategy.getCurrentPlayer().setCurrentPosition(strategy.getCurrentPlayer().getCurrentPosition() + move);
         } else {
             DisplayUtil.displayMessage(Message.SNAKE_LADDER_GAME_PLAY_ROLL_VALIDATION_MOVE_EXCEEDED_PREFIX
                     + move + Message.SNAKE_LADDER_GAME_PLAY_ROLL_VALIDATION_MOVE_EXCEEDED_SUFFIX);
-            return player.getCurrentPosition();
+            return strategy.getCurrentPlayer().getCurrentPosition();
         }
-        if (this.snakeMap.containsKey(player.getCurrentPosition())
-                && this.ladderMap.containsKey(player.getCurrentPosition())) {
-            int oldPosition = player.getCurrentPosition();
+        if (this.snakeMap.containsKey(strategy.getCurrentPlayer().getCurrentPosition())
+                && this.ladderMap.containsKey(strategy.getCurrentPlayer().getCurrentPosition())) {
+            int oldPosition = strategy.getCurrentPlayer().getCurrentPosition();
             int newSnakePosition = getSnakeEndIndexIfPresent(oldPosition).orElse(oldPosition);
             int newLadderPosition = getLadderEndIndexIfPresent(oldPosition).orElse(oldPosition);
             if (newSnakePosition != oldPosition) {
-                player.setCurrentPosition(newSnakePosition);
+                strategy.getCurrentPlayer().setCurrentPosition(newSnakePosition);
                 DisplayUtil.displayMessage(Message.SNAKE_LADDER_GAME_ELEMENT_ENCOUNTER_MSG_START
                         + oldPosition + Message.SNAKE_LADDER_GAME_ELEMENT_ENCOUNTER_MSG_TO
-                        + player.getCurrentPosition()
+                        + strategy.getCurrentPlayer().getCurrentPosition()
                         + Message.SNAKE_LADDER_GAME_ELEMENT_ENCOUNTER_MSG_BETWEEN
                         + Message.SNAKE_LADDER_GAME_ELEMENT_ENCOUNTER_SNAKE_AT
                         + oldPosition);
             } else if (oldPosition != newLadderPosition) {
-                player.setCurrentPosition(newLadderPosition);
+                strategy.getCurrentPlayer().setCurrentPosition(newLadderPosition);
                 DisplayUtil.displayMessage(Message.SNAKE_LADDER_GAME_ELEMENT_ENCOUNTER_MSG_START
                         + oldPosition + Message.SNAKE_LADDER_GAME_ELEMENT_ENCOUNTER_MSG_TO
-                        + player.getCurrentPosition()
+                        + strategy.getCurrentPlayer().getCurrentPosition()
                         + Message.SNAKE_LADDER_GAME_ELEMENT_ENCOUNTER_MSG_BETWEEN
                         + Message.SNAKE_LADDER_GAME_ELEMENT_ENCOUNTER_LADDER_AT
                         + oldPosition);
             }
         }
-        return player.getCurrentPosition();
+        return strategy.getCurrentPlayer().getCurrentPosition();
     }
 
     private Optional<Integer> getSnakeEndIndexIfPresent(int start) {
