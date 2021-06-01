@@ -2,6 +2,8 @@ package com.assignment.game;
 
 import com.assignment.game.board.GameBoard;
 import com.assignment.game.board.Player;
+import com.assignment.game.board.elements.impl.GreenSnake;
+import com.assignment.game.board.elements.impl.Snake;
 import com.assignment.game.board.strategy.GameStrategy;
 import com.assignment.game.board.strategy.impl.SinglePlayerGameStrategy;
 import com.assignment.game.constants.CommonConstants;
@@ -98,12 +100,14 @@ public class PlaySnakeLadderGame {
             if (elementStartEnd.length == 2) {
                 try {
                     if (isSnake) {
-                        board.addSnake(getPositiveIntegerFromString(elementStartEnd[0]),
-                                getPositiveIntegerFromString(elementStartEnd[1]));
+                        board.addSnake(new Snake(getPositiveIntegerFromString(elementStartEnd[0]),
+                                getPositiveIntegerFromString(elementStartEnd[1])));
                     } else {
                         board.addLadder(getPositiveIntegerFromString(elementStartEnd[0]),
                                 getPositiveIntegerFromString(elementStartEnd[1]));
                     }
+
+                    addGreenSnake(board);
                 } catch (InvalidSnakeConfigException | InvalidLadderConfigException | NumberFormatException e) {
                     DisplayUtil.displayMessage(e.getMessage());
                     addBoardElements(inputObj, board, isSnake, banners);
@@ -115,6 +119,17 @@ public class PlaySnakeLadderGame {
                 addBoardElements(inputObj, board, isSnake, banners);
             }
         }
+    }
+
+    private static void addGreenSnake(final GameBoard board) throws ElementExistsException, InvalidSnakeConfigException {
+        // assuminng it is a 10x10 board
+        GreenSnake greenSnake1 = new GreenSnake(25, 13, false);
+        GreenSnake greenSnake2 = new GreenSnake(39, 23, false);
+        GreenSnake greenSnake3 = new GreenSnake(81, 9, false);
+
+        board.addSnake(greenSnake1);
+        board.addSnake(greenSnake2);
+        board.addSnake(greenSnake3);
     }
 
     private static int getIntegerInput(final Scanner inputObj) {

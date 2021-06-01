@@ -1,5 +1,6 @@
 package com.assignment.game.board;
 
+import com.assignment.game.board.elements.impl.Snake;
 import com.assignment.game.exception.ElementExistsException;
 import com.assignment.game.exception.InvalidLadderConfigException;
 import com.assignment.game.exception.InvalidSnakeConfigException;
@@ -21,7 +22,7 @@ public class GameBoardTest extends TestCase {
     public void test_addValidSnake_shouldAddSnake() {
         boolean success;
         try {
-            this.testGameBoard.addSnake(8, 2);
+            this.testGameBoard.addSnake(new Snake(8, 2));
             success = true;
         } catch (InvalidSnakeConfigException | ElementExistsException e) {
             e.printStackTrace();
@@ -35,7 +36,7 @@ public class GameBoardTest extends TestCase {
     public void test_addInvalidSnake_shouldThrowException() {
         boolean exceptionThrown;
         try {
-            this.testGameBoard.addSnake(8, 23);
+            this.testGameBoard.addSnake(new Snake(8, 23));
             exceptionThrown = false;
         } catch (InvalidSnakeConfigException | ElementExistsException e) {
             e.printStackTrace();
@@ -49,7 +50,7 @@ public class GameBoardTest extends TestCase {
     public void test_addInvalidSnakeWithStartExceedingLimit_shouldThrowException() {
         boolean exceptionThrown;
         try {
-            this.testGameBoard.addSnake(100, 10);
+            this.testGameBoard.addSnake(new Snake(100, 10));
             exceptionThrown = false;
         } catch (InvalidSnakeConfigException | ElementExistsException e) {
             e.printStackTrace();
@@ -63,8 +64,8 @@ public class GameBoardTest extends TestCase {
     public void test_addValidSnakeTwice_shouldThrowException() {
         boolean exceptionThrown;
         try {
-            this.testGameBoard.addSnake(8, 2);
-            this.testGameBoard.addSnake(8, 5);
+            this.testGameBoard.addSnake(new Snake(8, 2));
+            this.testGameBoard.addSnake(new Snake(8, 5));
             exceptionThrown = false;
         } catch (InvalidSnakeConfigException | ElementExistsException e) {
             e.printStackTrace();

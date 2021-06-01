@@ -16,4 +16,8 @@ public abstract class Element {
     public int getEnd() {
         return this.end;
     }
+
+    public boolean shouldProcessed() {
+        return true;
+    }
 }

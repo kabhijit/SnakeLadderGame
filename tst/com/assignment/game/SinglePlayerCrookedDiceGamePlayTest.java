@@ -2,6 +2,7 @@ package com.assignment.game;
 
 import com.assignment.game.board.GameBoard;
 import com.assignment.game.board.Player;
+import com.assignment.game.board.elements.impl.Snake;
 import com.assignment.game.board.strategy.GameStrategy;
 import com.assignment.game.board.strategy.impl.SinglePlayerGameStrategy;
 import com.assignment.game.dice.DiceType;
@@ -38,9 +39,9 @@ public class SinglePlayerCrookedDiceGamePlayTest extends GamePlayTest {
                 DiceFactory.getDiceOfType(DiceType.CROOKED.toString()));
         this.gameBoard = new GameBoard(5, singlePlayerGameStrategy);
         // Adding snakes on board
-        this.gameBoard.addSnake(12, 3);
-        this.gameBoard.addSnake(17, 9);
-        this.gameBoard.addSnake(22, 15);
+        this.gameBoard.addSnake(new Snake(12, 3));
+        this.gameBoard.addSnake(new Snake(17, 9));
+        this.gameBoard.addSnake(new Snake(22, 15));
         // Adding ladders on board
         this.gameBoard.addLadder(5, 16);
         this.gameBoard.addLadder(10, 23);

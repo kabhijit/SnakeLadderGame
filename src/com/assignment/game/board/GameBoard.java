@@ -1,5 +1,6 @@
 package com.assignment.game.board;
 
+import com.assignment.game.board.elements.impl.GreenSnake;
 import com.assignment.game.board.elements.impl.Ladder;
 import com.assignment.game.board.elements.impl.Snake;
 import com.assignment.game.board.strategy.GameStrategy;
@@ -52,13 +53,17 @@ public class GameBoard {
         this(size, size, gameStrategy);
     }
 
-    public void addSnake(final int start, final int end) throws InvalidSnakeConfigException, ElementExistsException {
+    public void addSnake(final Snake snake) throws InvalidSnakeConfigException, ElementExistsException {
+        validateAndAddSnake(snake.getStart(), snake.getEnd(), snake);
+    }
+
+    private void validateAndAddSnake(final int start, final int end, final Snake snake) throws InvalidSnakeConfigException, ElementExistsException {
         if (!ValidationUtil.isValidSnake(start, end, this.limit)) {
             throw new InvalidSnakeConfigException(Message.SNAKE_LADDER_GAME_INVALID_SNAKE_EXCEPTION_PREFIX + start
                     + Message.SNAKE_LADDER_GAME_INVALID_SNAKE_EXCEPTION_SUFFIX + end);
         }
         if (checkElementAvailability(start, end)) {
-            Snake snake = new Snake(start, end);
+
             this.snakeMap.put(start, snake);
             addTakenTileEntry(start, end);
         }
@@ -77,7 +82,11 @@ public class GameBoard {
     }
 
     public int play() {
-        return updateMarkerForPlayer(this.gameStrategy);
+        return updateMarkerForPlayer(this.gameStrategy, gameStrategy.play());
+    }
+
+    public int play(int move) {
+        return updateMarkerForPlayer(this.gameStrategy, move);
     }
 
     public int lastRecordedMove() {
@@ -123,8 +132,11 @@ public class GameBoard {
         this.takenTiles.add(end);
     }
 
-    private int updateMarkerForPlayer(final GameStrategy strategy) {
-        final int move = strategy.play();
+    public void forceToPosition() {
+
+    }
+
+    private int updateMarkerForPlayer(final GameStrategy strategy, final int move) {
         if (this.limit >= move + strategy.getCurrentPlayer().getCurrentPosition()) {
             strategy.getCurrentPlayer().setCurrentPosition(strategy.getCurrentPlayer().getCurrentPosition() + move);
         } else {
@@ -134,6 +146,14 @@ public class GameBoard {
         }
         if (this.snakeMap.containsKey(strategy.getCurrentPlayer().getCurrentPosition())
                 && this.ladderMap.containsKey(strategy.getCurrentPlayer().getCurrentPosition())) {
+            Snake snake = this.snakeMap.get(strategy.getCurrentPlayer().getCurrentPosition());
+            if (snake instanceof GreenSnake && ((GreenSnake)snake).shouldProcessed()) {
+                ((GreenSnake) snake).visit();
+            } else {
+                DisplayUtil.displayMessage("Green snake was already processed");
+                return strategy.getCurrentPlayer().getCurrentPosition();
+            }
+
             int oldPosition = strategy.getCurrentPlayer().getCurrentPosition();
             int newSnakePosition = getSnakeEndIndexIfPresent(oldPosition).orElse(oldPosition);
             int newLadderPosition = getLadderEndIndexIfPresent(oldPosition).orElse(oldPosition);
@@ -156,6 +176,10 @@ public class GameBoard {
             }
         }
         return strategy.getCurrentPlayer().getCurrentPosition();
+    }
+
+    private void moveOnBoard() {
+
     }
 
     private Optional<Integer> getSnakeEndIndexIfPresent(int start) {
